@@ -36,7 +36,7 @@ def fetch_game_image(bgg_id):
 @app.route('/')
 def index():
     conn = get_db_connection()
-    boardgames = conn.execute('SELECT * FROM boardgames').fetchall()
+    boardgames = conn.execute('SELECT * FROM boardgames ORDER BY name').fetchall()
     conn.close()
     return render_template('index.html', boardgames=boardgames)
 
