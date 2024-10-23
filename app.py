@@ -4,6 +4,7 @@ import requests
 import re
 
 app = Flask(__name__)
+
 DATABASE = 'boardgames.db'
 
 # Helper function to connect to the database
@@ -12,29 +13,26 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# Helper function to fetch game details from BoardGameGeek
-def get_boardgame_details(bgg_url):
-    # Extract the game ID from the BoardGameGeek URL using regex
-    match = re.search(r'boardgamegeek\.com/boardgame/(\d+)', bgg_url)
+# Helper function to extract BGG ID from the URL
+def extract_bgg_id(bgg_url):
+    match = re.search(r'boardgame/(\d+)', bgg_url)
     if match:
-        game_id = match.group(1)
-        bgg_api_url = f"https://boardgamegeek.com/xmlapi2/thing?id={game_id}&stats=1"
-        response = requests.get(bgg_api_url)
-        
-        if response.status_code == 200:
-            # Simple parsing of XML to get the title and image (assuming the API returns XML)
-            # Using regex to extract title and image from response.text
-            title_match = re.search(r'<name type="primary" .* value="([^"]+)"', response.text)
-            image_match = re.search(r'<image>([^<]+)</image>', response.text)
+        return match.group(1)
+    return None
 
-            if title_match and image_match:
-                title = title_match.group(1)
-                image_url = image_match.group(1)
-                return title, image_url
+# Helper function to fetch the game image from BoardGameGeek
+def fetch_game_image(bgg_id):
+    bgg_api_url = f'https://boardgamegeek.com/xmlapi2/thing?id={bgg_id}'
+    response = requests.get(bgg_api_url)
+    if response.status_code == 200:
+        # Parse the XML response to get the image URL
+        from xml.etree import ElementTree as ET
+        root = ET.fromstring(response.content)
+        image_url = root.find('./item/image').text
+        return image_url
+    return "https://via.placeholder.com/100"
 
-    return None, None
-
-# Route: Main page - List of board games
+# Main page - List of board games
 @app.route('/')
 def index():
     conn = get_db_connection()
@@ -42,27 +40,35 @@ def index():
     conn.close()
     return render_template('index.html', boardgames=boardgames)
 
-# Route: Add a new board game
+# Add a new board game
 @app.route('/add', methods=('GET', 'POST'))
 def add_game():
     if request.method == 'POST':
+        # Fetch the game name, BGG URL, and owner from the form
+        game_name = request.form['game_name']
         bgg_url = request.form['bgg_url']
         owner = request.form['owner']
 
-        # Fetch game details from BoardGameGeek
-        title, image_url = get_boardgame_details(bgg_url)
+        # Extract BGG ID from the provided URL
+        bgg_id = extract_bgg_id(bgg_url)
+        if not bgg_id:
+            return "Invalid BoardGameGeek URL", 400
 
-        if title and image_url:
-            conn = get_db_connection()
-            conn.execute('INSERT INTO boardgames (name, owner, bgg_url, image_url) VALUES (?, ?, ?, ?)',
-                         (title, owner, bgg_url, image_url))
-            conn.commit()
-            conn.close()
-            return redirect(url_for('index'))
+        # Fetch the game image from BoardGameGeek
+        image_url = fetch_game_image(bgg_id)
+
+        # Save the new board game into the database
+        conn = get_db_connection()
+        conn.execute('INSERT INTO boardgames (name, owner, bgg_url, image_url) VALUES (?, ?, ?, ?)',
+                     (game_name, owner, bgg_url, image_url))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('index'))
 
     return render_template('add_game.html')
 
-# Initialize the database
+# Initialize the database (run once to create the table)
 def init_db():
     conn = get_db_connection()
     conn.execute('''
