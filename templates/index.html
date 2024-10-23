@@ -21,20 +21,20 @@
             <thead class="table-dark">
                 <tr>
                     <th scope="col">#</th>
-                    <th scope="col">Game Image</th>
-                    <th scope="col">Game Name</th>
+                    <th scope="col">Image</th>
+                    <th scope="col">Name</th>
                     <th scope="col">Owner</th>
-                    <th scope="col">BoardGameGeek Link</th>
+                    <th scope="col">BGG</th>
                 </tr>
             </thead>
             <tbody>
                 {% for game in boardgames %}
-                <tr>
+                <tr class="align-middle">
                     <th scope="row">{{ loop.index }}</th>
                     <td><img src="{{ game['image_url'] }}" alt="{{ game['name'] }}" class="img-thumbnail" style="width: 100px;"></td>
                     <td>{{ game['name'] }}</td>
                     <td>{{ game['owner'] }}</td>
-                    <td><a href="{{ game['bgg_url'] }}" target="_blank" class="btn btn-info">View on BGG</a></td>
+                    <td><a href="{{ game['bgg_url'] }}" target="_blank" class="btn btn-info">BGG</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
