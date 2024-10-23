@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Board Game</title>
+</head>
+<body>
+    <h1>Add a New Board Game</h1>
+    <form method="POST">
+        <label for="bgg_url">BoardGameGeek URL:</label>
+        <input type="url" id="bgg_url" name="bgg_url" required>
+        <br>
+        <label for="owner">Owner:</label>
+        <input type="text" id="owner" name="owner" required>
+        <br>
+        <button type="submit">Add Game</button>
+    </form>
+    <br>
+    <a href="{{ url_for('index') }}">Back to List</a>
+</body>
+</html>

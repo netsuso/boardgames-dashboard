@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Board Games List</title>
+</head>
+<body>
+    <h1>Board Games List</h1>
+    <a href="{{ url_for('add_game') }}">Add New Game</a>
+    <ul>
+        {% for game in boardgames %}
+            <li>
+                <img src="{{ game.image_url }}" alt="Box image of {{ game.name }}" width="100">
+                <strong>{{ game.name }}</strong> (Owner: {{ game.owner }})
+                <a href="{{ game.bgg_url }}" target="_blank">BoardGameGeek Link</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
