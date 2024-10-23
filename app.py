@@ -24,7 +24,7 @@ def get_boardgame_details(bgg_url):
         if response.status_code == 200:
             # Simple parsing of XML to get the title and image (assuming the API returns XML)
             # Using regex to extract title and image from response.text
-            title_match = re.search(r'<name type="primary" value="([^"]+)"', response.text)
+            title_match = re.search(r'<name type="primary" .* value="([^"]+)"', response.text)
             image_match = re.search(r'<image>([^<]+)</image>', response.text)
 
             if title_match and image_match:
